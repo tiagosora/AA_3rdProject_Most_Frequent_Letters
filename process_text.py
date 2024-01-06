@@ -1,3 +1,4 @@
+import unicodedata
 import nltk
 import os
 import re
@@ -5,27 +6,45 @@ import string
 import sys
 from nltk.corpus import stopwords
 
+# List of avaiable content documents and their respective languages
 file_langs = {
-    'pg26361':'english',
-    'pg31802':'greek',
-    'pg2100':'swedish',
-    'pg5881':'spanish',
-    'pg62383':'portuguese'
+    './content/pg26361.txt':'english',
+    './content/pg31802.txt':'greek',
+    './content/pg2100.txt':'swedish',
+    './content/pg5881.txt':'spanish',
+    './content/pg62383.txt':'portuguese'
 }
 
+# Set NLTK data path and download stopwords
+nltk.download('stopwords')
+
+def normalize_text(text: str, lang: str = None):
+    # Check if the language uses Latin alphabet and apply normalization
+    if lang in ['english', 'spanish', 'portuguese', 'swedish']:
+        return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+    else:
+        return text
+    
 # Function to preprocess text data using custom stopwords from a file
-def preprocess_text(file_name, lang):
+def preprocess_text(file_path: str, lang : str = None):
+    
+    print(f"Processing file {file_path}")
+    
+    # Obtain file languague
+    if lang is None:
+        if file_path not in file_langs.keys():
+            print(f'File {file_path} is not registered in for the file languages.')
+            exit(1)
 
     # Define file paths
-    input_file_path = f'./content/{file_name}.txt'
-    output_file_path = f'./processed/{file_name}.txt'
+    output_file_path = f'./processed/{file_path.replace("./content/","")}'
 
     # Regular expressions for start and end markers
     start_marker_regex = r"\*\*\* START OF (THIS|THE) PROJECT GUTENBERG EBOOK .* \*\*\*"
     end_marker_regex = r"\*\*\* END OF (THIS|THE) PROJECT GUTENBERG EBOOK .* \*\*\*"
 
     # Read the input file
-    with open(input_file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
         text = file.read()
 
     # Find start and end markers using regex
@@ -46,6 +65,9 @@ def preprocess_text(file_name, lang):
 
     # Removing digits and extra spaces
     text = re.sub(r'\d+ ', '', text).strip()
+    
+    # Normalize the text
+    text = normalize_text(text, lang)
 
     # Save the preprocessed text to a new file
     if not os.path.exists('./processed'):
@@ -53,38 +75,26 @@ def preprocess_text(file_name, lang):
     with open(output_file_path, 'w', encoding='utf-8') as output_file:
         output_file.write(text)
 
-    return output_file_path
+    print(f"Processed text saved to ./processed/ directory.")
 
+# Manual usage
 if __name__ == "__main__":
+    
+    # 'python process.py' 
     if len(sys.argv) == 1:
-        # Set NLTK data path and download stopwords
-        nltk.download('stopwords')
-
         for file in os.listdir('./content/'):
             if '.txt' in os.path.basename(file):
-                
-                print(f"\nProcessing file {file}")
-                
-                file_name = file[:-4]                                       # Remove .txt
-                lang = file_langs[file_name]
-                preprocessed_file_path = preprocess_text(file_name, lang)
-                
-                print(f"Processed text saved to: {preprocessed_file_path}")
-                
-    elif len(sys.argv) == 3:
-        # Set NLTK data path and download stopwords
-        nltk.download('stopwords')
-        
-        file_name = sys.argv[1]
-        lang = sys.argv[2]
-        preprocessed_file_path = preprocess_text(file_name, lang)
-        
-        print(f"Processed text saved to: {preprocessed_file_path}")
-        
+                preprocess_text(f'./content/{file}')
+
+    # 'python process.py <file_path>'
+    elif len(sys.argv) == 2:
+        preprocess_text(sys.argv[1])
+
+    # Wrong usage
     else:
         print("Usage:")
-        print(" python preprocess.py")
+        print(" python process.py")
         print("OR")
-        print(" python preprocess.py <file_name> <language>")
+        print(" python process.py <file_path>")
         sys.exit(1)
 

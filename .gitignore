@@ -160,7 +160,8 @@ cython_debug/
 #.idea/
 
 
-content/
-processed/
-letter_counts/
-approx_counter/
+content
+processed
+exact_counter
+approx_counter
+space_saving

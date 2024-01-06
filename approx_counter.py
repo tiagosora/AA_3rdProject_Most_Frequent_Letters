@@ -2,29 +2,12 @@ import random
 from collections import Counter
 import os
 import sys
-import unicodedata
 
-file_langs = {
-    'pg26361': 'english',
-    'pg31802': 'greek',
-    'pg2100': 'swedish',
-    'pg5881': 'spanish',
-    'pg62383': 'portuguese'
-}
-
-def normalize_text(text, lang):
-    if lang in ['english', 'spanish', 'portuguese', 'swedish']:
-        return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
-    else:
-        return text
-
-def approximate_count_fixed_probability(file_path, lang, output_file_path, probability=1/8):
+def approximate_count_fixed_probability(file_path: str, probability: float = 1/8):
+    
     # Read the preprocessed file
     with open(file_path, 'r', encoding='utf-8') as file:
         text = file.read()
-
-    # Normalize text if applicable
-    text = normalize_text(text, lang)
 
     # Initialize an empty Counter
     approximate_counts = Counter()
@@ -39,34 +22,36 @@ def approximate_count_fixed_probability(file_path, lang, output_file_path, proba
         approximate_counts[letter] *= int(1 / probability)
         
     # Save the results
+    output_file_path = f'./approx_counter/{file_path.replace("./processed/","")}'
     if not os.path.exists('./approx_counter'):
         os.makedirs('./approx_counter')
     with open(output_file_path, 'w', encoding='utf-8') as output_file:
-        for letter, count in dict(sorted(approximate_counts.items())).items():
+        sorted_approximate_counts = sorted(approximate_counts.items(), key=lambda x: x[1], reverse=True)
+        for letter, count in sorted_approximate_counts:
             output_file.write(f"{letter}: {count}\n")
+        print(f"Approximate counts saved to: {output_file_path}")
+        
+    return sorted_approximate_counts
 
+# Manual usage
 if __name__ == "__main__":
+    
+    # 'python approximate_counter.py <file_path>'
     if len(sys.argv) == 2:
         # User specified a single file to process
-        file_name = sys.argv[1]
-        lang = file_langs[file_name]
-        preprocessed_file_path = f'./processed/{file_name}.txt'
-        output_file_path = f'./approx_counter/{file_name}.txt'
-        approximate_count_fixed_probability(preprocessed_file_path, lang, output_file_path)
-        print(f"Approximate counts saved to: {output_file_path}")
+        approximate_count_fixed_probability(sys.argv[1])
+    
+    # 'python approximate_counter.py'
     elif len(sys.argv) == 1:
         # Process all files in the ./processed/ directory
         for file in os.listdir('./processed/'):
             if file.endswith('.txt'):
-                file_name = file[:-4]  # Remove .txt extension
-                lang = file_langs[file_name]
-                preprocessed_file_path = f'./processed/{file}'
-                output_file_path = f'./approx_counter/{file_name}.txt'
-                approximate_count_fixed_probability(preprocessed_file_path, lang, output_file_path)
-                print(f"Approximate counts saved to: {output_file_path}")
+                approximate_count_fixed_probability(f'./processed/{file}')
+    
+    # Wrong usage
     else:
         print("Usage:")
         print(" python approximate_counter.py")
         print("OR")
-        print(" python approximate_counter.py <file_name>")
+        print(" python approximate_counter.py <file_path>")
         sys.exit(1)
