@@ -12,7 +12,7 @@ def count_letters_and_save(file_path: str):
     letter_counts = Counter(filter(str.isalpha, text))
 
     # Save the letter counts to a file
-    output_file_path = f'./exact_counter/{file_path.replace("./processed/","")}'
+    output_file_path = f'./exact_counter/exact_{file_path.replace("./processed/","")}'
     if not os.path.exists('./exact_counter'):
         os.makedirs('./exact_counter')
     with open(output_file_path, 'w', encoding='utf-8') as output_file:
@@ -26,12 +26,12 @@ def count_letters_and_save(file_path: str):
 # Manual usage
 if __name__ == "__main__":
     
-    # 'python counter.py'
+    # 'python counter.py <file_path>'
     if len(sys.argv) == 2:
         # User specified a single file to process
         count_letters_and_save(sys.argv[1])
     
-    # 'python counter.py <file_path>'
+    # 'python counter.py'
     elif len(sys.argv) == 1:
         # Process all files in the ./processed/ directory
         for file in os.listdir('./processed/'):

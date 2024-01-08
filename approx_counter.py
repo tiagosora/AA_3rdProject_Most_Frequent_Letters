@@ -22,7 +22,7 @@ def approximate_count_fixed_probability(file_path: str, probability: float = 1/8
         approximate_counts[letter] *= int(1 / probability)
         
     # Save the results
-    output_file_path = f'./approx_counter/{file_path.replace("./processed/","")}'
+    output_file_path = f'./approx_counter/approx_{file_path.replace("./processed/","")}'
     if not os.path.exists('./approx_counter'):
         os.makedirs('./approx_counter')
     with open(output_file_path, 'w', encoding='utf-8') as output_file:

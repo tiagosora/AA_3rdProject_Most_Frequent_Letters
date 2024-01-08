@@ -64,7 +64,8 @@ def preprocess_text(file_path: str, lang : str = None):
     text = ' '.join([word for word in text.split() if word not in lang_stopwords])
 
     # Removing digits and extra spaces
-    text = re.sub(r'\d+ ', '', text).strip()
+    text = re.sub(r'\d+', '', text).strip()
+    text = text.replace('»', '').replace('«', '').replace(' ', '')
     
     # Normalize the text
     text = normalize_text(text, lang)

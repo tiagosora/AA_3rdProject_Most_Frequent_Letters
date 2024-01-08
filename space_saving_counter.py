@@ -23,7 +23,7 @@ class SpaceSavingCounter:
                 self.counters[item] = self.counters.pop(min_item) + 1
                 
         # Save results to file
-        output_file_path = f'./space_saving/{file_path.replace("./processed/","")}'
+        output_file_path = f'./space_saving/space_saving_{file_path.replace("./processed/","")}'
         if not os.path.exists('./space_saving'):
             os.makedirs('./space_saving')
         with open(output_file_path, 'w', encoding='utf-8') as output_file:

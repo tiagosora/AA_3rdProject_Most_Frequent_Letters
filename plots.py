@@ -17,10 +17,21 @@ def prepare_error_data(file_name, error_data, method_key):
                     plot_data['Relative Error'].append(values['avg_rel_error'])
     return pd.DataFrame(plot_data)
 
-def plot_errors(df, title, ylabel, column, method_key):
-    ax = df.plot(x='File', y=column, kind='bar', color='skyblue', figsize=(10, 6))
+def plot_errors(df, title, ylabel, column, method_key, file_name):
+    
+    file_langs = {
+        'pg26361.txt':'English',
+        'pg5881.txt':'Spanish',
+        'pg31802.txt':'Greek',
+        'pg62383.txt':'Portuguese',
+        'pg2100.txt':'Swedish'
+    }
+    
+    ax = df.plot(y=column, kind='bar', color='skyblue', figsize=(10, 6))
+    
     plt.title(title)
     plt.ylabel(ylabel)
+    plt.xlabel(file_langs[file_name])
     plt.xticks([])
 
     # For the approximate counter, draw the average line
@@ -40,8 +51,8 @@ def main():
         methods = {'approx': "Approximate Counter", 'space_saving': "Space-Saving Counter"}
         for method_key in methods.keys():
             df = prepare_error_data(file_name, error_data, method_key)
-            plot_errors(df, f'Absolute Error - {methods[method_key]}', 'Error', 'Absolute Error', method_key)
-            plot_errors(df, f'Relative Error - {methods[method_key]}', 'Error', 'Relative Error', method_key)
+            plot_errors(df, f'Absolute Error - {methods[method_key]}', 'Error', 'Absolute Error', method_key, file_name)
+            plot_errors(df, f'Relative Error - {methods[method_key]}', 'Error', 'Relative Error', method_key, file_name)
 
 if __name__ == "__main__":
     main()
